@@ -14,6 +14,28 @@ const domains = {
 
 router.use(loginLimiter);
 
+const authenticate = (strategy, options) => {
+  return (req, res, next) =>
+    passport.authenticate(strategy, options, (err, user, info) => {
+      if (err) {
+        return next(err);
+      }
+
+      if (user) {
+        req.user = user;
+      }
+
+      if (!user && info) {
+        const message = info.message || info;
+        if (typeof message === 'string') {
+          return res.redirect(`${domains.client}/login?error=${message}`);
+        }
+      }
+
+      next();
+    })(req, res, next);
+};
+
 const oauthHandler = async (req, res) => {
   try {
     await checkDomainAllowed(req, res);
@@ -33,7 +55,7 @@ const oauthHandler = async (req, res) => {
  */
 router.get(
   '/google',
-  passport.authenticate('google', {
+  authenticate('google', {
     scope: ['openid', 'profile', 'email'],
     session: false,
   }),
@@ -41,9 +63,7 @@ router.get(
 
 router.get(
   '/google/callback',
-  passport.authenticate('google', {
-    failureRedirect: `${domains.client}/login`,
-    failureMessage: true,
+  authenticate('google', {
     session: false,
     scope: ['openid', 'profile', 'email'],
   }),
@@ -52,7 +72,7 @@ router.get(
 
 router.get(
   '/facebook',
-  passport.authenticate('facebook', {
+  authenticate('facebook', {
     scope: ['public_profile'],
     profileFields: ['id', 'email', 'name'],
     session: false,
@@ -61,9 +81,7 @@ router.get(
 
 router.get(
   '/facebook/callback',
-  passport.authenticate('facebook', {
-    failureRedirect: `${domains.client}/login`,
-    failureMessage: true,
+  authenticate('facebook', {
     session: false,
     scope: ['public_profile'],
     profileFields: ['id', 'email', 'name'],
@@ -73,16 +91,14 @@ router.get(
 
 router.get(
   '/openid',
-  passport.authenticate('openid', {
+  authenticate('openid', {
     session: false,
   }),
 );
 
 router.get(
   '/openid/callback',
-  passport.authenticate('openid', {
-    failureRedirect: `${domains.client}/login`,
-    failureMessage: true,
+  authenticate('openid', {
     session: false,
   }),
   oauthHandler,
@@ -90,7 +106,7 @@ router.get(
 
 router.get(
   '/github',
-  passport.authenticate('github', {
+  authenticate('github', {
     scope: ['user:email', 'read:user'],
     session: false,
   }),
@@ -98,17 +114,16 @@ router.get(
 
 router.get(
   '/github/callback',
-  passport.authenticate('github', {
-    failureRedirect: `${domains.client}/login`,
-    failureMessage: true,
+  authenticate('github', {
     session: false,
     scope: ['user:email', 'read:user'],
   }),
   oauthHandler,
 );
+
 router.get(
   '/discord',
-  passport.authenticate('discord', {
+  authenticate('discord', {
     scope: ['identify', 'email'],
     session: false,
   }),
@@ -116,9 +131,7 @@ router.get(
 
 router.get(
   '/discord/callback',
-  passport.authenticate('discord', {
-    failureRedirect: `${domains.client}/login`,
-    failureMessage: true,
+  authenticate('discord', {
     session: false,
     scope: ['identify', 'email'],
   }),
