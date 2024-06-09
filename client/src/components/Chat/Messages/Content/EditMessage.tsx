@@ -7,6 +7,8 @@ import { cn, removeFocusOutlines } from '~/utils';
 import { useChatContext } from '~/Providers';
 import { useLocalize } from '~/hooks';
 import Container from './Container';
+import { useRecoilState } from 'recoil';
+import store from '~/store';
 
 const EditMessage = ({
   text,
@@ -20,6 +22,7 @@ const EditMessage = ({
   const { getMessages, setMessages, conversation } = useChatContext();
 
   const [editedText, setEditedText] = useState<string>(text ?? '');
+  const [messagesUI, setMessagesUI] = useRecoilState<boolean>(store.messagesUI);
   const textAreaRef = useRef<HTMLTextAreaElement | null>(null);
 
   const { conversationId, parentMessageId, messageId } = message;
@@ -110,7 +113,12 @@ const EditMessage = ({
   );
 
   return (
-    <Container message={message}>
+    <Container
+      message={message}
+      className={cn({
+        'rounded-3xl bg-gray-100 px-3 py-3 dark:bg-gray-600': messagesUI,
+      })}
+    >
       <TextareaAutosize
         ref={textAreaRef}
         onChange={(e) => {
@@ -120,7 +128,7 @@ const EditMessage = ({
         data-testid="message-text-editor"
         className={cn(
           'markdown prose dark:prose-invert light whitespace-pre-wrap break-words dark:text-gray-20',
-          'm-0 w-full resize-none border-0 bg-transparent p-0',
+          'm-0 w-full resize-none border-0 bg-transparent p-0 p-2',
           removeFocusOutlines,
         )}
         onPaste={(e) => {
@@ -141,9 +149,17 @@ const EditMessage = ({
         value={editedText}
         suppressContentEditableWarning={true}
       />
-      <div className="mt-2 flex w-full justify-center text-center">
+      <div
+        className={cn('mt-2 flex w-full items-center justify-center text-center', {
+          'justify-end': messagesUI,
+        })}
+      >
         <button
-          className="btn btn-primary relative mr-2"
+          className={cn('relative mr-2', {
+            'btn btn-primary': messagesUI,
+            'inline-flex items-center rounded-md bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-500/80 dark:hover:bg-green-500/60':
+              !messagesUI,
+          })}
           disabled={
             isSubmitting || (endpoint === EModelEndpoint.google && !message.isCreatedByUser)
           }
@@ -151,14 +167,26 @@ const EditMessage = ({
         >
           {localize('com_ui_save_submit')}
         </button>
+        {/* btn-secondary has off styles */}
         <button
-          className="btn btn-secondary relative mr-2"
+          className={cn('relative mr-2', {
+            'btn btn-primary': messagesUI,
+            'inline-flex items-center rounded-md bg-green-500 px-3 py-2 text-sm font-medium text-white hover:bg-green-500/80 dark:hover:bg-green-500/60':
+              !messagesUI,
+          })}
           disabled={isSubmitting}
           onClick={updateMessage}
         >
           {localize('com_ui_save')}
         </button>
-        <button className="btn btn-neutral relative" onClick={() => enterEdit(true)}>
+        <button
+          className={cn('relative', {
+            'btn btn-neutral dark:bg-white dark:text-black dark:hover:bg-white/80': messagesUI,
+            'inline-flex items-center rounded-md border bg-transparent px-3 py-2 text-sm font-medium text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600':
+              !messagesUI,
+          })}
+          onClick={() => enterEdit(true)}
+        >
           {localize('com_ui_cancel')}
         </button>
       </div>
