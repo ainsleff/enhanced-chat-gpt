@@ -4,6 +4,8 @@ import { getConfigDefaults } from 'librechat-data-provider';
 import { useGetStartupConfig } from 'librechat-data-provider/react-query';
 import type { ContextType } from '~/common';
 import { EndpointsMenu, ModelSpecsMenu, PresetsMenu, HeaderNewChat } from './Menus';
+
+import ProfileButton from './ProfileButton';
 import ExportAndShareMenu from './ExportAndShareMenu';
 import HeaderOptions from './Input/HeaderOptions';
 import { useMediaQuery } from '~/hooks';
@@ -32,7 +34,10 @@ export default function Header() {
           {interfaceConfig.presets && <PresetsMenu />}
           {isSmallScreen && <ExportAndShareMenu className="pl-0" />}
         </div>
-        {!isSmallScreen && <ExportAndShareMenu />}
+        <div className="flex items-center gap-2 font-normal">
+          {!isSmallScreen && <ExportAndShareMenu />}
+          <ProfileButton className="hidden md:block" />
+        </div>
       </div>
       {/* Empty div for spacing */}
       <div />
