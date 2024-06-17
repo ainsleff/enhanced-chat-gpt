@@ -299,6 +299,7 @@ export type TDangerButtonProps = {
   actionTextCode: string;
   dataTestIdInitial: string;
   dataTestIdConfirm: string;
+  infoDescriptionCode?: string;
   confirmActionTextCode?: string;
 };
 
