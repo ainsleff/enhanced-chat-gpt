@@ -9,6 +9,7 @@ const requireLdapAuth = (req, res, next) => {
       });
       return next(err);
     }
+
     if (!user) {
       console.log({
         title: '(requireLdapAuth) Error: No user',
